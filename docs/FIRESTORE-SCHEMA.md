@@ -18,6 +18,7 @@ _schemaVersion: 1  // increment when doing a breaking schema change
 This enables **lazy migration** — when a document is read, check `_schemaVersion` and migrate on the fly if it's behind current. See the `/evolve-schema` skill for the full migration workflow.
 
 **Rules:**
+
 - `_schemaVersion` is always `1` on creation
 - Non-breaking changes (adding optional fields with defaults) keep the same version
 - Breaking changes (rename, remove, type change) increment the version and require a migration function
@@ -27,11 +28,11 @@ This enables **lazy migration** — when a document is read, check `_schemaVersi
 
 ## `users` collection
 
-**Path:** `/users/{userId}`
+**Path:** `/users/{userId}`  
 **Access:** Owner-only (user can read/write their own document; admins can read all)
 
 | Field | Type | Required | Description |
-|-------|------|----------|-------------|
+| --- | --- | --- | --- |
 | `uid` | `string` | Yes | Firebase Auth UID (same as document ID) |
 | `email` | `string` | Yes | User's email address |
 | `displayName` | `string \| null` | Yes | Display name from Auth or profile |
@@ -41,9 +42,26 @@ This enables **lazy migration** — when a document is read, check `_schemaVersi
 | `updatedAt` | `Timestamp` | Yes | When the document was last updated |
 | `_schemaVersion` | `1` | Yes | Schema version for lazy migration |
 
-**Creation:** Auto-created by `AuthProvider` on first sign-in via `syncUserProfile()`.
+**Creation:** Auto-created by `AuthProvider` on first sign-in via `syncUserProfile()`.  
 **Deletion:** Hard-delete is disabled in security rules. Use `deletedAt` field for soft-delete.
 
 ---
 
-<!-- Add new collection schemas below using the /firebase-collection skill -->
+## `notes` collection
+
+**Path:** `/notes/{noteId}`  
+**Access:** Owner-only (users can only read and write their own notes)
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `uid` | `string` | Yes | Firebase Auth UID of the note owner |
+| `title` | `string` | Yes | Note title |
+| `body` | `string` | Yes | Note body |
+| `createdAt` | `Timestamp` | Yes | When the note was created |
+| `updatedAt` | `Timestamp` | Yes | When the note was last updated |
+| `deletedAt` | `Timestamp \| null` | No | Soft-delete timestamp |
+| `_schemaVersion` | `1` | Yes | Schema version for lazy migration |
+
+**Creation:** Created through the `createNote()` server action.  
+**Access:** Firestore security rules restrict notes to the authenticated owner.  
+**Deletion:** Hard-delete is disabled. Use `deletedAt` for soft-delete.
